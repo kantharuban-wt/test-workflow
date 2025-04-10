@@ -40,48 +40,43 @@ jobs:
       GITHUB_EVENT_INPUTS_SERVICE: ${{ github.event.inputs.service }}
       GITHUB_EVENT_INPUTS_ENVIRONMENT: ${{ github.event.inputs.environment }}
 
-    outputs:
-      updated_var: ${{ steps.set_env.outputs.updated_var }}
     steps:
 
       - name: Convert service input to uppercase
-        shell: pwsh
         run: |
+
           if (-not $env:GITHUB_EVENT_INPUTS_SERVICE) {
             Write-Error "GITHUB_EVENT_INPUTS_SERVICE is not set or is null."
             exit 1
           }
-
           $uppercaseService = $env:GITHUB_EVENT_INPUTS_SERVICE.ToUpper()
           $publishProfile = "${uppercaseService}_PUBLISH_PROFILE"
           $publishProfileENV = $env:GITHUB_EVENT_INPUTS_ENVIRONMENT
           $publishProfileName = "${publishProfileENV}.pubxml"
           $currentENV = "${publishProfileENV}_${uppercaseService}"
+          echo "SERVICE_UPPER=$uppercaseService" >> $env:GITHUB_ENV
+          echo "PUBLISH_PROFILE=$publishProfile" >> $env:GITHUB_ENV
+          echo "PUBLISH_PROFILE_NAME=$publishProfileName" >> $env:GITHUB_ENV
+          echo "CURRENTENV=$currentENV" >> $env:GITHUB_ENV
 
-          @"
-          SERVICE_UPPER=$uppercaseService
-          PUBLISH_PROFILE=$publishProfile
-          PUBLISH_PROFILE_NAME=$publishProfileName
-          CURRENTENV=$currentENV
-          "@ | Out-File -Append -FilePath $env:GITHUB_ENV
-
-      - name: Echo environment variables
         shell: pwsh
-        run: |
-          echo "SERVICE_UPPER: $env:SERVICE_UPPER"
-          echo "PUBLISH_PROFILE: $env:PUBLISH_PROFILE"
-          echo "PUBLISH_PROFILE_NAME: $env:PUBLISH_PROFILE_NAME"
-          echo "CURRENTENV: $env:CURRENTENV"
+      
+      
+      - name: echo service_upper
+        run: echo $SERVICE_UPPER 
+        
+      - name: echo publish_profile
+        run:  echo $PUBLISH_PROFILE
 
-      - name: Set output variable
-        id: set_env
-        #run: echo "::set-output name=updated_var::CURRENTENV"
-        run: |
-            echo "updated_var=$env:CURRENTENV" >> $env:GITHUB_OUTPUT
+      - name: echo publish_profile_name
+        run: echo $PUBLISH_PROFILE_NAME 
+        
+      - name: echo  env_publish_profile_name
+        run: echo ${{ env.PUBLISH_PROFILE_NAME }}
+
+      - name: echo currentENV 
+        run: echo $CURRENTENV
+
+      
+
   
-  deploy:
-    runs-on: windows-latest
-    needs: build
-    steps:
-      - name: Use output from build job
-        run: "echo 'Updated Variable: ${{ needs.build.outputs.updated_var }}'"
