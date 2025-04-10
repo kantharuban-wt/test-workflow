@@ -1,0 +1,67 @@
+name: "Synapxe HealthHub Build and Deploy"
+
+on:
+  workflow_dispatch:
+    inputs:
+      service:
+        description: "Choose the service to build and deploy (CM, CD, ID)"
+        required: true
+        default: 'CM'
+        type: choice
+        options:
+          - cm
+          - cd
+          - id
+      environment:
+        description: "Choose the environment to deploy (SIT, UAT, PROD)"
+        required: true
+        default: 'SIT'
+        type: choice
+        options:
+          - SIT
+          - UAT
+          - PROD
+
+env:
+  STORAGE_ACCOUNT: cicdpipeline
+  RESOURCE_GROUP: abc-2itest
+
+jobs:
+  
+
+  build:
+  
+    runs-on: windows-latest
+    timeout-minutes: 30
+
+    env:
+      ARTIFACT_NAME: ${{ github.event.inputs.service }}-artifact
+      CONTAINER: ${{ github.event.inputs.service }}-artifacts
+      GITHUB_EVENT_INPUTS_SERVICE: ${{ github.event.inputs.service }}
+      GITHUB_EVENT_INPUTS_ENVIRONMENT: ${{ github.event.inputs.environment }}
+
+    steps:
+
+      - name: Convert service input to uppercase
+        run: |
+
+          if (-not $env:GITHUB_EVENT_INPUTS_SERVICE) {
+            Write-Error "GITHUB_EVENT_INPUTS_SERVICE is not set or is null."
+            exit 1
+          }
+          $uppercaseService = $env:GITHUB_EVENT_INPUTS_SERVICE.ToUpper()
+          $publishProfile = "${uppercaseService}_PUBLISH_PROFILE"
+          $publishProfileENV = $env:GITHUB_EVENT_INPUTS_ENVIRONMENT
+          $publishProfileName = "${publishProfileENV}.pubxml"
+          echo "SERVICE_UPPER=$uppercaseService" >> $env:GITHUB_ENV
+          echo "PUBLISH_PROFILE=$publishProfile" >> $env:GITHUB_ENV
+          echo "PUBLISH_PROFILE_NAME=$publishProfileName" >> $env:GITHUB_ENV
+        shell: pwsh
+      
+      
+      - name: Testvars.
+        run: echo $SERVICE_UPPER & echo $PUBLISH_PROFILE & echo $PUBLISH_PROFILE_NAME & echo ${{ env.PUBLISH_PROFILE_NAME }}
+
+      
+
+  
