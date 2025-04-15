@@ -1,0 +1,12 @@
+name: "building frontend"
+description: "building frontend with NPM"
+
+runs:
+  using: "composite"
+  steps:
+
+    - name: building frontend
+      run: "echo 'building frontend with NPM'"
+      shell: pwsh
+
+   
