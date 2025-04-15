@@ -81,7 +81,7 @@ jobs:
         
       - name: building frontend
         if: ${{ github.event.inputs.service == 'cm' || github.event.inputs.service == 'cd' }}
-        uses: ./.github/actions/frontend-build
+        uses: kantharuban-wt/test-workflow/.github/actions/frontend-build@main
   
   deploy:
     runs-on: windows-latest
